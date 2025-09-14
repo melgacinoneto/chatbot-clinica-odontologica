@@ -25,6 +25,9 @@ Automatizar todo o fluxo de atendimento via WhatsApp, desde o primeiro contato d
 - Redução do tempo de resposta de ~30 minutos para **6 segundos**, inclusive fora do horário comercial  
 - Atendimento disponível 24/7, mantendo precisão e consistência  
 
+
+O fluxo de atendimento automatizado do N8N está disponível em: [fluxo-atendimento.json](n8n-workflow/fluxo-atendimento.json)
+
 ---
 
 **Observação:** Este repositório é para fins de demonstração e aprendizado. Nenhum dado real de pacientes foi incluído.
