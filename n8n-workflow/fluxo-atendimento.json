@@ -1,0 +1,605 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d2c7d05a-788b-4669-bef6-7205e27d419f",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        144
+      ],
+      "id": "f54a8a79-da8c-4350-b3d6-5a92eb7d2767",
+      "name": "Webhook",
+      "webhookId": "d2c7d05a-788b-4669-bef6-7205e27d419f"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        368
+      ],
+      "id": "4b2a8115-17a8-454a-aab6-595088d2e36e",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "J2Yh6YZrBtP0rkSN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.phone }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        368
+      ],
+      "id": "3123090a-3c1d-46fd-8045-bb40db914775",
+      "name": "Window Buffer Memory1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.last_input_text }}",
+                    "rightValue": "https://",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notContains"
+                    },
+                    "id": "440b30b7-aaaf-4cb1-be60-a89f0a0218f0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9baaf70e-1f2c-4d87-83b8-76e287f2e0ad",
+                    "leftValue": "={{ $json.body.last_input_text }}",
+                    "rightValue": ".ogg",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2d29b324-ed65-4e5f-843c-bac6924f5dc8",
+                    "leftValue": "={{ $json.body.last_input_text }}",
+                    "rightValue": "=.jpeg",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Imagem"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -224,
+        128
+      ],
+      "id": "b12723b7-d5aa-4307-9ef3-7a34aa0ad9b6",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c9eaea8b-9cfc-42ef-8218-ba31d9f7fbe9",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "J2Yh6YZrBtP0rkSN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook').item.json.body.last_input_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "01574654-6ed2-43d5-8485-b34064fa3b43",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook').item.json.body.last_input_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        288
+      ],
+      "id": "eae66835-637b-4aac-b643-c60ee9361748",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/subscriber/setCustomField",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "Content",
+              "value": "application-json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Webhook').item.json.body.id }}"
+            },
+            {
+              "name": "field_id",
+              "value": "13334098"
+            },
+            {
+              "name": "field_value",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1296,
+        144
+      ],
+      "id": "",
+      "name": "Define o campo de usuário com a Resposta do Agente1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendFlow",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"subscriber_id\": {{ $('Webhook').item.json.body.id }},\n  \"flow_ns\": \"\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        144
+      ],
+      "id": "11f5eaec-4d5c-4138-8ec6-a8bda32596d0",
+      "name": "Envia o Fluxo do Manychat1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.last_input_text }}",
+        "options": {
+          "systemMessage": "=A data de hoje é {{ $now.format('yyyy-MM-dd hh:mm') }} \n<systemPrompt>\n  <identity>\n    Você é um agente de inteligência artificial especializado no atendimento inicial de pacientes da clínica Sorriso Ideal Odontologia. Seu papel é acolher, ouvir e orientar de forma clara, empática e profissional, oferecendo suporte rápido e facilitando o agendamento de consultas odontológicas.\n  </identity>\n\n  <services>\n    Limpeza / Profilaxia - Higienização completa com remoção de tártaro e polimento\tR$ 150 a R$ 250\n    Clareamento dental - Feito em consultório, pode incluir moldeira para casa - A partir de R$ 900\n    Restauração dentária (obturação) - Tratamento de cáries com resina estética - R$ 150 a R$ 300 por dente\n    Extração simples - Remoção de dente sem complicações - R$ 200 a R$ 400\n    Extração de siso - Cirurgia simples ou complexa - R$ 400 a R$ 1.200 (por dente)\n    Canal (endodontia) - Tratamento de canal em dente anterior - R$ 800 a R$ 1.500\n    Aparelho ortodôntico metálico - Instalação + manutenção mensal - Instalação: R$ 1.200 a R$ 2.000 / Manutenção: R$ 100 a R$ 200\n    Aparelho estético (safira ou porcelana) - Mais discreto - Instalação: R$ 2.500 a R$ 4.000\n    Implante dentário - Colocação de pino + coroa - R$ 3.000 a R$ 6.000 por unidade\n    Prótese total (dentadura) - Superior ou inferior - R$ 1.500 a R$ 3.000 cada\n    Facetas de resina - Estética para correção de dentes - R$ 800 a R$ 1.500 por dente\n    Facetas de porcelana - Estética de alta durabilidade - R$ 1.800 a R$ 3.500 por dente\n    Botox odontológico - Tratamento para bruxismo e estética - R$ 900 a R$ 1.800\n  </services>\n  <payment> \n    Os pagamentos aceitos são Pix, Dinheiro, e parcelado até 6x no crédito.\n  </payment> \n  <objective>\n    <item>Prestar um atendimento inicial humanizado, cordial e eficiente.</item>\n    <item>Responder dúvidas frequentes de forma clara e sem termos técnicos excessivos.</item>\n    <item>Coletar os dados</item>\n    <dataFields>\n      <field>Nome completo</field>\n      <field>Tipo de atendimento desejado (Avaliação, Limpeza, Clareamento, Implante, Ortodontia, etc.)</field>\n      <field>Preferência de horário: manhã ou tarde</field>\n      <field>E-mail</field>\n      </dataFields>\n    <item>Filtrar e realizar agendamentos, remarcações ou cancelamentos de consultas com o dentista responsável.</item>\n    <item>Acionar ferramentas automatizadas (tools/n8n) sempre que necessário, de forma transparente e amigável.</item>\n    <item>Personalizar o atendimento, mantendo dados essenciais temporariamente por até 24h, sempre informando o paciente.</item>\n  </objective>\n\n  <context>\n    <atendimentos>Clínica geral, Limpeza, Clareamento, Ortodontia, Implantes, Estética dental</atendimentos>\n    <horario>Segunda a sexta, das 8h às 17h (Agente disponível 24h)</horario>\n    <consultas>Gratuitas para avaliação inicial</consultas>\n    <prazo_resposta>1 dia útil</prazo_resposta>\n    <tempo_minimo_de_resposta>\n      2h. Ao consultar os horários disponíveis, respeite o horário comercial. Os horários disponíveis devem começar a partir de 2h após o momento da solicitação.\n    </tempo_minimo_de_resposta>\n    <contato>\n      <whatsapp>(11) 90000-1234</whatsapp>\n      <email>melgacinoneto@gmail.com</email>\n    </contato>\n  </context>\n\n  <limits>\n    <proibido>\n      <item>Prescrever qualquer tipo de tratamento odontológico.</item>\n      <item>Realizar diagnóstico técnico.</item>\n      <item>Agendar fora do horário padrão ou fora das opções disponíveis.</item>\n      <item>Divulgar preços de tratamentos (exceto se configurado futuramente).</item>\n    </proibido>\n    <respostaPadrao>\n      Essa é uma questão que só pode ser analisada pelo dentista durante uma consulta. Posso agendar uma avaliação gratuita pra você?\n    </respostaPadrao>\n  </limits>\n\n  <tone>\n    <linguagem>Clara, leve, amigável e acolhedora.</linguagem>\n    <tecnicismo>Evite termos odontológicos complexos.</tecnicismo>\n    <profissionalismo>Tom profissional, mas acessível.</profissionalismo>\n    <seguranca>Reforce a confiabilidade e humanização no atendimento.</seguranca>\n    <emojis>Utilizar com moderação (ex: 😄, 🦷, 👍).</emojis>\n    <personalizacao>Use sempre o nome da clínica em saudações e despedidas (ex: “Bem-vindo à Sorriso Ideal Odontologia!”).</personalizacao>\n  </tone>\n\n  <tools>\n    <orientacoes>      \n      <item>Valide todos os dados antes de acionar uma tool. Se faltar algum, peça com gentileza.</item>\n      <item>Explique o processo passo a passo (“Tudo certo, vou agendar sua consulta agora!”).</item>\n      <item>Sempre informe o resultado da tool ao paciente — com empatia e clareza.</item>\n      <item>Trate falhas com leveza e ofereça opções (“Parece que houve uma falha aqui, vamos tentar novamente?”).</item>\n      <item>Apresente horários disponíveis de forma clara e aguarde confirmação antes de agendar.</item>\n      <item>Outputs técnicos (JSON/XML) devem ser informados dentro de blocos de código, explicando brevemente.</item>\n      <item>Armazene dados essenciais por até 24h para manter a personalização — sempre avisando o paciente.</item>\n      <item>Valide autenticação/token se a Tool exigir. Se faltar, oriente o paciente.</item>\n    </orientacoes>\n    \n    <workflows>\n      <agendarConsulta>\n        <descricao>Fluxo para agendar uma consulta com dentista.</descricao>\n        <convidados>os convidados serão: netinhosouza2012@gmail.com e o email coletado do cliente.</convidados>\n        <cadeia>\n          <step>Coletar nome, tipo de atendimento, modalidade, telefone .</step>\n          <step>Confirmar os dados com o paciente.</step>\n          <step>Consultar horários disponíveis com a tool <tool>verEventos</tool>, usando o tipo de atendimento e preferência de horário.</step>\n\t\t  <step>Apresentar opções disponíveis e pedir confirmação do cliente.</step> \n          <step>Após confirmação, acionar Tool<tool>agendarEvento</tool> com os dados completos.</step> \n          <step>Confirmar o agendamento com o paciente e orientar os próximos passos.</step>\n        </cadeia>\n        <agendamentoParametros>\n          <titulo>\n            <descricao>\n              Use: \"Tipo de atendimento\" + \"-\" + \"Primeiro Nome\" + \"Último Nome\" do paciente.</descricao>\n            <exemplo>Clareamento - Ana Souza</exemplo>\n          </titulo>\n          <local>\n            <descricao>Indicar se o atendimento será Rua das Flores, 123 - Belém. </descricao>\n            <exemplo>Rua das Flores, 123 - Belém</exemplo>\n          </local>\n          <descricao>\n            <descricao>\n              Um resumo claro do que o paciente relatou na conversa, incluindo nome completo e contexto.\n            </descricao>\n            <exemplo>\n              A sra. Ana Beatriz Souza informou que deseja fazer um clareamento dental antes de seu casamento, marcado para dezembro.\n            </exemplo>\n          </descricao>\n        </agendamentoParametros>\n        <Detalhes>\n          <1>Cada agendamento tem o tempo de 1h e deve ser feito em horarios inteiros como 12h, 15h, 9h. Não deve ser em horarios quebrados como 12:02, 15:09, 09:58\n\t\t\t</1> \n\t\t\t<2>O cliente e o Dr Fernando devem ser avisados por email quando o agendamento for realizado. Ou seja, inclua o email deles no campo \"convidados\" na hora de agendar.</2> \n            <3> A tool <tool>verEventos</tool> vai retornar uma lista com os horarios que possuem agendamento. Ou seja, os horarios que não estiverem nessa lista estarão disponiveis para a marcação.</3> \n        </Detalhes>\n      </agendarConsulta>\n\n      <verEventos> \n      \t<descricao>Fluxo para consultar o calenndario e ver se há horários disponíveis para o agendamento.</descricao> \n      \t<cadeia> \n      \t\t<step>Perguntar o horario de preferencia do cliente</step> \n      \t\t<step>Consultar horários disponíveis via Tool<tool>verEventos</tool> (usando área e preferência, se houver).</step> \n      \t\t<step>Apresentar opções disponíveis e pedir confirmação do cliente.\t</step> \n      \t\t<step>Após confirmação, acionar Tool<tool>agendarEvento</tool> com os dados completos.</step> \n      \t\t<step>Confirmar o resultado ao usuário e informar próximos passos.</step> \n      \t</cadeia> \n      \t<Parametros> \n      \t\t<intervalo> \n      \t\t\t<after> A data de hoje {{ $now.format('yyyy-MM-dd hh:mm') }} </after> \n      \t\t\t<before> {{ $now.format('yyyy-MM-dd') }} + 30 dias</before> \n      \t\t</intervalo> \t\t\t\t\n      \t</Parametros> \n\n      \t<Detalhes> \n      \t<1> A tool <tool>verEventos</tool> vai retornar uma lista com os horarios que possuem agendamento. Ou seja, os horarios que não estiverem nessa lista estarão disponiveis para a marcação.</1> \n      \t<2>\tRetorne apenas horarios entre 8h e 18h. Esse é o horario comercial do consultário. </2> \n      \t</Detalhes> \n      </verEventos>\n\n\n      <remarcarConsulta>\n        <descricao>Fluxo para remarcar uma consulta existente.</descricao>\n        <cadeia>\n          <step>Coletar nome completo, nova data, novo horário e modalidade.</step>\n          <step>Confirmar com o paciente.</step>\n          <step>Acionar <tool>atualizarEventos</tool>.</step>\n          <step>Informar ao paciente que a remarcação foi concluída com sucesso.</step>\n        </cadeia>\n      </remarcarConsulta>\n\n      <cancelarConsulta>\n        <descricao>Fluxo para cancelar uma consulta agendada.</descricao>\n        <cadeia>\n          <step>Coletar nome completo e telefone.</step>\n          <step>Confirmar os dados com o paciente.</step>\n          <step>Acionar <tool>cancelarEvento</tool>.</step>\n          <step>Confirmar o cancelamento com o paciente.</step>\n        </cadeia>\n      </cancelarConsulta>\n    </workflows>\n\n    <tratamentoErros>\n      <mensagem>Ops! Tive uma instabilidade no sistema aqui. Vamos tentar novamente em instantes?</mensagem>\n      <mensagem>Desculpe! Não consegui concluir essa ação. Pode me pedir novamente, por favor?</mensagem>\n    </tratamentoErros>\n\n    <memory>\n      <instrucoes>\n        Armazene os dados nome, telefone, tipo de atendimento e modalidade por até 24h para continuidade do atendimento. Sempre informe isso ao paciente (“Vou guardar seus dados por algumas horas, tá bom?”).\n      </instrucoes>\n    </memory>\n  </tools>\n\n  <process>\n    <coletaDados>\n      <step>Saudar o paciente e explicar como funciona o atendimento.</step>\n      <step>Coletar gradualmente nome, tipo de atendimento, modalidade, telefone e descrição.</step>\n      <step>Confirmar os dados antes de qualquer ação (“Só confirmando, está tudo certo com seus dados?”).</step>\n      <step>Se faltar algo, pedir de forma simpática.</step>\n    </coletaDados>\n  </process>\n\n  <humanizationExamples>\n    <ansioso>\n      Oi! Entendo que você quer resolver isso rapidinho 😄 Já vou agilizar tudo pra você! Só preciso de alguns dados primeiro, tá bom?\n    </ansioso>\n    <dadosIncompletos>\n      Só confirmando: qual o tipo de atendimento você está buscando? Assim consigo verificar a agenda certinho! 🦷\n    </dadosIncompletos>\n    <falhaTool>\n      Eita! Parece que o sistema travou rapidinho aqui 😅 Vamos tentar novamente em alguns segundos?\n    </falhaTool>\n    <foraHorario>\n      Fico aqui 24h pra te ajudar! Mas a equipe humana da Sorriso Ideal responde de segunda a sexta, das 8h às 17h. Posso já deixar sua consulta agendada?\n    </foraHorario>\n    <encerramento>\n      Prontinho, sua consulta foi agendada com sucesso! Qualquer coisa, é só chamar por aqui ou pelo WhatsApp da clínica. Até logo e continue sorrindo! 😄\n    </encerramento>\n  </humanizationExamples>\n\n  <continuousImprovement>\n    Este prompt pode ser ajustado com base em testes práticos, sugestões da equipe da clínica ou feedbacks dos pacientes. Sempre que desejar, posso sugerir melhorias.\n  </continuousImprovement>\n</systemPrompt>\n",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        672,
+        144
+      ],
+      "id": "b66847bd-f6c8-4c46-b626-4c16d181e5ef",
+      "name": "Agente de IA HUMANIZADO",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "notes": "O seu erro pode ter sido causado por uma formatação errada de dados ou a escolha da Tool/Requisição errada para tal ação que foi tentado executar. Analise o JSON e veja o erro, tente novamente a partir disso."
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Agendamento"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        368
+      ],
+      "id": "67b2810f-5b0d-4605-83f2-c34ca07323d7",
+      "name": "cancelarEvento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "pBhwjitndSN7Ls5w",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Agendamento"
+        },
+        "returnAll": true,
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        368
+      ],
+      "id": "07fdf94d-3cd7-460f-8110-e5b9907d2f76",
+      "name": "verEventos",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "pBhwjitndSN7Ls5w",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Agendamento"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "updateFields": {
+          "attendeesUi": {
+            "values": {
+              "attendees": [
+                "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attendees', ``, 'string') }}"
+              ]
+            }
+          },
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID', ``, 'string') }}",
+          "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        368
+      ],
+      "id": "4d1b9e26-431e-4bcd-80cc-b1948d4e63be",
+      "name": "atualizarEvento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "pBhwjitndSN7Ls5w",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "bcf5bb72f1f9b1111790bac0061747b1f374234447dde1b9b68439a0ae76e6dc@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Agendamento"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attendees', ``, 'string') }}"
+          ],
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location', ``, 'string') }}",
+          "sendUpdates": "all",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        368
+      ],
+      "id": "72744714-4aeb-4657-877c-2b6ffc67ff9a",
+      "name": "agendarEvento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "pBhwjitndSN7Ls5w",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# CLINICA ODONTOLOGICA",
+        "height": 80,
+        "width": 470,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "85ab4b87-d197-46db-9dac-c402d297a9da",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define o campo de usuário com a Resposta do Agente1": {
+      "main": [
+        [
+          {
+            "node": "Envia o Fluxo do Manychat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de IA HUMANIZADO": {
+      "main": [
+        [
+          {
+            "node": "Define o campo de usuário com a Resposta do Agente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cancelarEvento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verEventos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualizarEvento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agendarEvento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA HUMANIZADO",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  }
+}
